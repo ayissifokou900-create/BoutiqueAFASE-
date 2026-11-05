@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cahier Boutique</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b6b3a"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Cahier Boutique">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f6f3ea;--surf:#fffdf7;--ink:#1d2a22;--mute:#6b766e;--line:#ddd6c3;--green:#0b6b3a;--ong:#fff;--red:#b3261e;--gold:#e8b020}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a15;--surf:#1a251e;--ink:#eef0e6;--mute:#9aa79d;--line:#2b3a30;--green:#3fbf7a;--ong:#0b1a11;--red:#ff7d73;--gold:#f0c040}}
+:root[data-theme="dark"]{--bg:#121a15;--surf:#1a251e;--ink:#eef0e6;--mute:#9aa79d;--line:#2b3a30;--green:#3fbf7a;--ong:#0b1a11;--red:#ff7d73;--gold:#f0c040}
+*,*:before,*:after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 "Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;max-width:520px;margin-inline:auto;padding-bottom:48px}
+header{padding:20px 16px 12px}
+h1{margin:0 0 14px;font-size:22px;font-weight:800;letter-spacing:-.02em}
+h2{font-size:17px;margin:24px 0 4px;font-weight:800}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.stat small{display:block;color:var(--mute);font-size:13px}
+.stat b{font-size:20px;font-weight:800}
+.stat.debt{border-left:5px solid var(--red)}.stat.cash{border-left:5px solid var(--green)}
+.warn{background:var(--gold);color:#1b1500;border-radius:10px;padding:10px 12px;margin-top:10px;font-weight:600;font-size:14px}
+nav{display:flex;gap:6px;padding:0 16px;margin-bottom:12px}
+nav button{flex:1;padding:10px 2px;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:8px;font:inherit;font-weight:600;font-size:14px}
+nav button[aria-selected="true"]{background:var(--green);color:var(--ong);border-color:var(--green)}
+main{padding:0 16px}
+label{display:block;font-size:14px;color:var(--mute);margin:12px 0 4px}
+input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--surf);color:var(--ink);font:inherit}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid var(--gold);outline-offset:1px}
+.row{display:flex;gap:10px}.row>*{flex:1}
+button{font:inherit;cursor:pointer}
+.btn{width:100%;margin-top:16px;padding:14px;border:0;border-radius:8px;background:var(--green);color:var(--ong);font-weight:800;font-size:17px}
+.btn.sec{background:transparent;color:var(--green);border:2px solid var(--green);margin-top:8px}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px}
+.card .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.name{font-weight:800}.owed{color:var(--red);font-weight:800}
+.mini{display:flex;gap:8px;margin-top:10px}
+.mini button,.mini a{flex:1;text-align:center;padding:10px 6px;border-radius:8px;border:1px solid var(--green);background:transparent;color:var(--green);font-weight:600;text-decoration:none;font-size:15px}
+.mini .wa{background:var(--green);color:var(--ong)}
+.sub{color:var(--mute);font-size:14px}
+.empty{text-align:center;color:var(--mute);padding:22px 8px}
+.ok{background:var(--surf);border:2px solid var(--green);border-radius:10px;padding:12px;margin-top:14px}
+.hide{display:none!important}
+.plus{color:var(--green)}.minus{color:var(--red)}
+.box{background:var(--surf);border:1px dashed var(--green);border-radius:10px;padding:4px 12px 14px;margin-bottom:6px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Cahier Boutique</h1>
+  <div class="stats">
+    <div class="stat cash"><small>Encaissé aujourd’hui</small><b id="sCash">0 FCFA</b></div>
+    <div class="stat debt"><small>Dettes clients</small><b id="sDebt">0 FCFA</b></div>
+  </div>
+  <div id="nudge"></div>
+</header>
+<nav role="tablist">
+  <button role="tab" data-t="dettes" aria-selected="true">Dettes</button>
+  <button role="tab" data-t="vente" aria-selected="false">Vente</button>
+  <button role="tab" data-t="stock" aria-selected="false">Stock</button>
+  <button role="tab" data-t="histo" aria-selected="false">Historique</button>
+</nav>
+<main>
+<section id="dettes">
+  <div id="detteList"></div>
+  <h2>Ajouter une ancienne dette</h2>
+  <div class="sub">Pour recopier ton cahier papier : un client qui te doit déjà de l’argent.</div>
+  <label for="dc">Client</label>
+  <select id="dc"></select>
+  <div id="dNew" class="row">
+    <div><label for="dn">Nom</label><input id="dn" placeholder="Ex : Mama Brigitte"></div>
+    <div><label for="dp">WhatsApp</label><input id="dp" inputmode="tel" placeholder="6XXXXXXXX"></div>
+  </div>
+  <label for="da">Montant dû (FCFA)</label>
+  <input id="da" type="number" inputmode="numeric" min="0">
+  <button class="btn sec" id="addDebt">Ajouter cette dette</button>
+</section>
+
+<section id="vente" class="hide">
+  <div class="box">
+    <h2>Total de la journée</h2>
+    <div class="sub">Pas le temps de tout noter ? Entre seulement ce que tu as encaissé aujourd’hui.</div>
+    <div class="row" style="align-items:end"><div><label for="td">Montant (FCFA)</label><input id="td" type="number" inputmode="numeric" min="0"></div><button class="btn" id="saveTd" style="margin-top:0;flex:0 0 42%">Enregistrer</button></div>
+    <div id="tdMsg" class="sub" style="margin-top:8px"></div>
+  </div>
+  <h2>Vente détaillée</h2>
+  <label for="cli">Client</label>
+  <select id="cli"></select>
+  <div id="newCli" class="hide">
+    <div class="row">
+      <div><label for="nn">Nom</label><input id="nn" placeholder="Ex : Mama Brigitte"></div>
+      <div><label for="np">WhatsApp</label><input id="np" inputmode="tel" placeholder="6XXXXXXXX"></div>
+    </div>
+  </div>
+  <div class="row">
+    <div style="flex:2"><label for="prod">Article en stock (facultatif)</label><select id="prod"></select></div>
+    <div><label for="qty">Quantité</label><input id="qty" type="number" inputmode="numeric" min="1" value="1"></div>
+  </div>
+  <label for="note">Précision (facultatif)</label>
+  <input id="note" placeholder="Ex : 2 sacs de riz, huile">
+  <div class="row">
+    <div><label for="amt">Montant total (FCFA)</label><input id="amt" type="number" inputmode="numeric" min="0"></div>
+    <div><label for="paid">Payé maintenant</label><input id="paid" type="number" inputmode="numeric" min="0"></div>
+  </div>
+  <button class="btn" id="save">Enregistrer la vente</button>
+  <div id="done" class="ok hide"></div>
+</section>
+
+<section id="stock" class="hide">
+  <div class="sub">Le stock est facultatif : ajoute seulement tes articles les plus chers ou les plus vendus.</div>
+  <label for="pn">Nouvel article</label>
+  <input id="pn" placeholder="Ex : Riz 25 kg">
+  <div class="row">
+    <div><label for="pp">Prix de vente (FCFA)</label><input id="pp" type="number" inputmode="numeric" min="0"></div>
+    <div><label for="pq">Quantité en stock</label><input id="pq" type="number" inputmode="numeric" min="0"></div>
+  </div>
+  <button class="btn" id="addP">Ajouter l’article</button>
+  <div id="stockList" style="margin-top:16px"></div>
+</section>
+
+<section id="histo" class="hide">
+  <div id="histoList"></div>
+  <h2>Sauvegarde</h2>
+  <div class="sub" id="bkInfo"></div>
+  <button class="btn" id="bk">Sauvegarder mes données</button>
+  <label for="rt">Restaurer : colle ici le texte d’une sauvegarde</label>
+  <textarea id="rt" rows="3"></textarea>
+  <label for="rf">ou choisis le fichier de sauvegarde</label>
+  <input id="rf" type="file" accept=".json,application/json">
+  <button class="btn sec" id="rs">Restaurer la sauvegarde</button>
+</section>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+const fmt=n=>Math.round(n).toLocaleString('fr-FR')+' FCFA';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const iso=d=>{const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+const dateFr=s=>new Date(s+'T12:00:00').toLocaleDateString('fr-FR');
+const phone=p=>{let d=(p||'').replace(/\D/g,'');if(d.length===9)d='237'+d;return d};
+const wa=(p,m)=>'https://wa.me/'+phone(p)+'?text='+encodeURIComponent(m);
+const today=d=>new Date(d).toDateString()===new Date().toDateString();
+let db={clients:[],tx:[],products:[]};
+try{const r=localStorage.getItem('cahier-v1');if(r)db=Object.assign({clients:[],tx:[],products:[]},JSON.parse(r))}catch(e){}
+const save=()=>{try{localStorage.setItem('cahier-v1',JSON.stringify(db))}catch(e){}};
+const balance=cid=>db.tx.filter(t=>t.cid===cid).reduce((s,t)=>s+(t.type==='sale'?t.amount-t.paid:-t.amount),0);
+function newClient(name,ph){const c={id:uid(),name,phone:ph};db.clients.push(c);return c}
+
+function render(){
+  const v1=$('#cli').value,v2=$('#dc').value,v3=$('#prod').value;
+  const co=db.clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  $('#cli').innerHTML='<option value="">Client de passage (comptoir)</option>'+co+'<option value="__new">+ Nouveau client</option>';
+  $('#dc').innerHTML='<option value="__new">+ Nouveau client</option>'+co;
+  $('#prod').innerHTML='<option value="">Autre article (saisie libre)</option>'+db.products.map(p=>`<option value="${p.id}">${esc(p.name)} (${p.qty} en stock)</option>`).join('');
+  if([...$('#cli').options].some(o=>o.value===v1))$('#cli').value=v1;
+  if([...$('#dc').options].some(o=>o.value===v2))$('#dc').value=v2;
+  if([...$('#prod').options].some(o=>o.value===v3))$('#prod').value=v3;
+  $('#newCli').classList.toggle('hide',$('#cli').value!=='__new');
+  $('#dNew').classList.toggle('hide',$('#dc').value!=='__new');
+
+  const rows=db.clients.map(c=>({c,b:balance(c.id)}));
+  const totalDebt=rows.reduce((s,x)=>s+Math.max(x.b,0),0);
+  const cash=db.tx.filter(t=>today(t.date)).reduce((s,t)=>s+(t.type==='sale'?t.paid:t.amount),0);
+  $('#sCash').textContent=fmt(cash);$('#sDebt').textContent=fmt(totalDebt);
+  const days=db.lastBackup?(Date.now()-new Date(db.lastBackup))/864e5:99;
+  $('#nudge').innerHTML=db.tx.length>3&&days>7?'<div class="warn">Pense à sauvegarder tes données (onglet Historique, en bas).</div>':'';
+  $('#bkInfo').textContent='Dernière sauvegarde : '+(db.lastBackup?dateFr(db.lastBackup):'jamais')+'. Tes données sont sur ce téléphone : sauvegarde-les régulièrement.';
+
+  const owing=rows.filter(x=>x.b>0).sort((a,b)=>b.b-a.b);
+  $('#detteList').innerHTML=owing.length?owing.map(({c,b})=>`
+   <div class="card"><div class="top"><span class="name">${esc(c.name)}</span><span class="owed">${fmt(b)}</span></div>
+   <div class="sub">${c.phone?'+'+phone(c.phone):'Pas de numéro'}</div>
+   <div class="hide" id="p-${c.id}" style="margin-top:10px"><div class="row"><input type="number" inputmode="numeric" placeholder="Montant reçu" id="pi-${c.id}"><select id="pm-${c.id}"><option>Espèces</option><option>MTN MoMo</option><option>Orange Money</option></select></div><button class="btn" style="margin-top:8px" data-pay="${c.id}">Valider le paiement</button></div>
+   <div class="hide" id="e-${c.id}" style="margin-top:10px"><div class="row"><input id="en-${c.id}" value="${esc(c.name)}" aria-label="Nom"><input id="ep-${c.id}" value="${esc(c.phone||'')}" inputmode="tel" placeholder="WhatsApp" aria-label="WhatsApp"></div><button class="btn" style="margin-top:8px" data-esave="${c.id}">Enregistrer</button></div>
+   <div class="mini"><button data-open="${c.id}">Encaisser</button><button data-edit="${c.id}">Modifier</button>${c.phone?`<a class="wa" target="_blank" rel="noopener" href="${wa(c.phone,`Bonjour ${c.name}, petit rappel : votre solde à la boutique est de ${fmt(b)}. Merci de passer régler quand vous pouvez.`)}">Relancer</a>`:''}</div></div>`).join(''):'<div class="empty">Aucune dette en cours. Les ventes à crédit et les anciennes dettes apparaîtront ici.</div>';
+
+  $('#stockList').innerHTML=db.products.length?db.products.map(p=>`<div class="card"><div class="top"><span class="name">${esc(p.name)}</span><span class="${p.qty<=3?'owed':''}">${p.qty} en stock</span></div><div class="sub">${fmt(p.price)}${p.qty<=3?' · stock bas, pense à recommander':''}</div><div class="mini"><button data-adj="${p.id}" data-d="-1">−1</button><button data-adj="${p.id}" data-d="1">+1</button><button data-adj="${p.id}" data-d="10">+10</button></div></div>`).join(''):'<div class="empty">Aucun article. Le stock est facultatif.</div>';
+
+  const last=[...db.tx].reverse().slice(0,40);
+  $('#histoList').innerHTML=last.length?last.map(t=>{const c=db.clients.find(x=>x.id===t.cid),d=new Date(t.date);
+   return `<div class="card"><div class="top"><span class="name">${c?esc(c.name):'Comptoir'}</span><span class="${t.type==='sale'?'plus':'minus'}">${t.type==='sale'?fmt(t.amount):'Paiement '+fmt(t.amount)}</span></div>
+   <div class="sub">${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}${t.note?' · '+esc(t.note):''}${t.mode?' · '+esc(t.mode):''}${t.type==='sale'&&t.amount>t.paid?' · reste '+fmt(t.amount-t.paid):''}</div></div>`}).join(''):'<div class="empty">Pas encore d’opération.</div>';
+}
+
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  ['dettes','vente','stock','histo'].forEach(id=>$('#'+id).classList.toggle('hide',id!==b.dataset.t));
+});
+$('#cli').onchange=()=>$('#newCli').classList.toggle('hide',$('#cli').value!=='__new');
+$('#dc').onchange=()=>$('#dNew').classList.toggle('hide',$('#dc').value!=='__new');
+$('#amt').oninput=()=>{$('#paid').value=$('#amt').value};
+function calc(){const p=db.products.find(x=>x.id===$('#prod').value);if(p){const a=p.price*(+$('#qty').value||1);$('#amt').value=a;$('#paid').value=a}}
+$('#prod').onchange=calc;$('#qty').oninput=calc;
+
+$('#saveTd').onclick=()=>{const a=+$('#td').value;if(!(a>0)){$('#td').focus();return}
+  db.tx.push({id:uid(),cid:null,type:'sale',amount:a,paid:a,note:'Total de la journée',date:Date.now()});save();$('#td').value='';render();$('#tdMsg').textContent='Total enregistré : '+fmt(a)};
+
+$('#save').onclick=()=>{
+  const amount=+$('#amt').value;if(!(amount>0)){$('#amt').focus();return}
+  const paid=$('#paid').value===''?amount:Math.min(+$('#paid').value,amount);
+  let cid=$('#cli').value,client=null;
+  if(cid==='__new'){const name=$('#nn').value.trim();if(!name){$('#nn').focus();return}client=newClient(name,$('#np').value.trim());cid=client.id}
+  else if(cid)client=db.clients.find(c=>c.id===cid);
+  if(!cid&&paid<amount){alert('Pour vendre à crédit, choisis ou crée un client.');return}
+  let note=$('#note').value.trim();const q=+$('#qty').value||1,pr=db.products.find(p=>p.id===$('#prod').value);
+  if(pr){pr.qty=Math.max(0,pr.qty-q);note=q+' × '+pr.name+(note?', '+note:'')}
+  db.tx.push({id:uid(),cid:cid||null,type:'sale',amount,paid,note,date:Date.now()});save();
+  const rest=amount-paid;
+  const msg=`Reçu – Boutique\n${note?note+'\n':''}Total : ${fmt(amount)}\nPayé : ${fmt(paid)}${rest>0?'\nReste à payer : '+fmt(rest)+(client?'\nSolde total : '+fmt(balance(cid)):''):''}\nMerci !`;
+  ['#amt','#paid','#note','#nn','#np'].forEach(s=>$(s).value='');$('#qty').value=1;
+  $('#prod').value='';$('#cli').value=cid||'';
+  render();
+  $('#done').classList.remove('hide');
+  $('#done').innerHTML=`<b>Vente enregistrée.</b>${rest>0?`<div class="sub">Dette : ${fmt(rest)}</div>`:''}`+
+    (client&&client.phone?`<a class="btn" style="display:block;text-align:center;text-decoration:none" target="_blank" rel="noopener" href="${wa(client.phone,msg)}">Envoyer le reçu sur WhatsApp</a>`:'')+
+    `<button class="btn sec" id="copy">Copier le reçu</button>`;
+  $('#copy').onclick=async()=>{try{await navigator.clipboard.writeText(msg);$('#copy').textContent='Reçu copié'}catch(e){$('#copy').textContent='Copie impossible'}};
+};
+
+$('#addDebt').onclick=()=>{
+  const a=+$('#da').value;let cid=$('#dc').value;
+  if(cid==='__new'||!cid){const name=$('#dn').value.trim();if(!name){$('#dn').focus();return}cid=newClient(name,$('#dp').value.trim()).id}
+  if(!(a>0)){$('#da').focus();return}
+  db.tx.push({id:uid(),cid,type:'sale',amount:a,paid:0,note:'Ancienne dette',date:Date.now()});save();
+  ['#dn','#dp','#da'].forEach(s=>$(s).value='');$('#dc').value='__new';render()};
+
+$('#dettes').onclick=e=>{
+  const d=e.target.dataset;
+  if(d.open){$('#p-'+d.open).classList.toggle('hide');$('#pi-'+d.open).focus()}
+  else if(d.edit)$('#e-'+d.edit).classList.toggle('hide');
+  else if(d.esave){const c=db.clients.find(x=>x.id===d.esave),n=$('#en-'+d.esave).value.trim();if(!n)return;c.name=n;c.phone=$('#ep-'+d.esave).value.trim();save();render()}
+  else if(d.pay){const v=+$('#pi-'+d.pay).value;if(!(v>0)){$('#pi-'+d.pay).focus();return}
+    db.tx.push({id:uid(),cid:d.pay,type:'pay',amount:v,paid:v,note:'',mode:$('#pm-'+d.pay).value,date:Date.now()});save();render()}
+};
+
+$('#addP').onclick=()=>{const name=$('#pn').value.trim(),price=+$('#pp').value,qty=+$('#pq').value||0;
+  if(!name){$('#pn').focus();return}if($('#pp').value===''||!(price>=0)){$('#pp').focus();return}
+  db.products.push({id:uid(),name,price,qty});save();['#pn','#pp','#pq'].forEach(s=>$(s).value='');render()};
+$('#stockList').onclick=e=>{const id=e.target.dataset.adj;if(!id)return;const p=db.products.find(x=>x.id===id);if(!p)return;p.qty=Math.max(0,p.qty+ +e.target.dataset.d);save();render()};
+
+$('#bk').onclick=async()=>{
+  const data=JSON.stringify(db),fn='cahier-boutique-sauvegarde-'+iso(new Date())+'.json';
+  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download=fn;document.body.appendChild(a);a.click();a.remove()}catch(e){}
+  try{await navigator.clipboard.writeText(data);alert('Sauvegarde faite : un fichier a été téléchargé et le texte est copié. Garde-en une copie dans tes notes ou sur WhatsApp.')}
+  catch(e){$('#rt').value=data;alert('Copie le texte affiché dans la case et garde-le dans tes notes.')}
+  db.lastBackup=iso(new Date());save();render()};
+$('#rf').onchange=e=>{const f=e.target.files[0];if(f)f.text().then(t=>{$('#rt').value=t})};
+$('#rs').onclick=()=>{const v=$('#rt').value.trim();if(!v){$('#rt').focus();return}
+  try{const d=JSON.parse(v);if(!Array.isArray(d.tx)||!Array.isArray(d.clients))throw 0;if(!confirm('Remplacer les données actuelles par cette sauvegarde ?'))return;db=Object.assign({clients:[],tx:[],products:[]},d);save();$('#rt').value='';render()}
+  catch(e){alert('Sauvegarde invalide. Colle tout le texte copié.')}};
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+render();
+</script>
+</body>
+</html>
